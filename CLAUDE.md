@@ -2,9 +2,7 @@
 
 Pair project for the CBL assignment in Programming (2IP90). A 2D side-scrolling shooter
 platformer: run, jump and shoot your way through a level to reach the flag.
-Controls: A / D run, W jump, Space shoot. Levels are loaded from text files (one char = one tile).
-The project switched from an earlier top-down "arena survivor" idea; the current Player
-movement is still top-down and gets replaced in backlog item 2.
+Controls: A / D run, Space jump, J shoot, R restart. Levels are loaded from text files (one char = one tile).
 
 ## Hard requirements (from the assignment)
 - Java Swing GUI only. No external libraries: it must build and run on Windows, macOS
@@ -25,9 +23,12 @@ movement is still top-down and gets replaced in backlog item 2.
 
 ## Architecture (Maven project; packages under src/main/java/blastnite)
 - `Main` — starts the GUI on the EDT.
-- `ui` — `GameWindow` (JFrame), `GamePanel` (Swing Timer game loop, delta time, painting).
-- `core` — `GameWorld`: all game state and rules; the GUI only calls update/draw.
-- `entity` — abstract `Entity`, `Player`. Switch collision shapes to rectangles for platforming.
+- `ui` — `GameWindow` (JFrame), `GamePanel` (Swing Timer game loop, delta time, painting), `Hud` (hearts, controls hint, win/game-over overlay).
+- `core` — `GameWorld` (all game state and rules; update order: input, move, collisions, remove dead, win/lose),
+  `GameState` (PLAYING / WON / GAME_OVER), `Camera` (horizontal scrolling).
+- `entity` — `Entity` (rectangle, dead flag) → `Creature` (gravity + X-then-Y collision) → `Player`, `Walker`;
+  `Bullet` and `Flag` extend `Entity` directly.
+- `level` — `Level` loads `src/main/resources/levels/level1.txt` (# block, P player, E walker, F flag), `Platform` (solid rectangle).
 - `input` — `InputHandler`: Key Bindings (not KeyListener), tracks held keys.
 
 ## Conventions
@@ -39,11 +40,11 @@ movement is still top-down and gets replaced in backlog item 2.
   Resource files go in src/main/resources.
 
 ## Status
-- Done: backlog item 1 (window & game loop).
-- Next: item 2 (run, jump & gravity), then item 3 (platforms & collisions).
+- Done: backlog items 1–9 (one complete, playable level).
+- Next: item 10 (start menu & pause), 11 (shooting enemy), 12 (coins & score).
 
 ## Build & run
 IDE: open as a Maven project and run blastnite.Main.
 Maven: mvn package && java -jar target/blastnite-1.0-SNAPSHOT.jar
-No Maven: javac -d out $(find src/main/java -name "*.java") && java -cp out blastnite.Main
+No Maven: javac -d out $(find src/main/java -name "*.java") && java -cp out:src/main/resources blastnite.Main
 The team uses Apache NetBeans and GitHub Desktop.
