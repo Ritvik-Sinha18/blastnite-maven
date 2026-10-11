@@ -1,6 +1,6 @@
 # Blastnite
 
-A 2D side-scrolling shooter platformer in Java Swing. A / D to run, W to jump, Space to shoot.
+A 2D side-scrolling shooter platformer in Java Swing. A / D to run, Space to jump, J to shoot, R to restart after winning or losing.
 
 ## Requirements
 Java 17 or newer (JDK). No external libraries.
@@ -16,8 +16,8 @@ recognises it from `pom.xml`. Run `blastnite.Main`.
 ## Build & run without Maven (plain JDK)
 macOS / Linux:
     javac -d out $(find src/main/java -name "*.java")
-    java -cp out blastnite.Main
+    java -cp out:src/main/resources blastnite.Main
 
 Windows (PowerShell):
     javac -d out (Get-ChildItem -Recurse src/main/java -Filter *.java).FullName
-    java -cp out blastnite.Main
+    java -cp "out;src/main/resources" blastnite.Main
