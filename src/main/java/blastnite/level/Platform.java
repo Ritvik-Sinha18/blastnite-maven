@@ -1,11 +1,9 @@
 package blastnite.level;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-
 /**
- * A solid rectangle the player can stand on and bump into
- * (ground, floating platforms, walls).
+ * A solid rectangle that creatures stand on and bump into.
+ * The Level builds these from the '#' blocks in the level file.
+ * It is pure data: the Level draws the blocks, this class is only for collisions.
  */
 public class Platform {
     private final double x;
@@ -20,11 +18,9 @@ public class Platform {
         this.height = height;
     }
 
-    public void draw(Graphics2D g) {
-        g.setColor(new Color(58, 66, 98));
-        g.fillRect((int) x, (int) y, (int) width, (int) height);
-        g.setColor(new Color(90, 102, 145));
-        g.fillRect((int) x, (int) y, (int) width, 6);   // lighter strip on top
+    /** True if the point (px, py) lies inside this platform. */
+    public boolean contains(double px, double py) {
+        return px >= x && px < x + width && py >= y && py < y + height;
     }
 
     public double getX() {

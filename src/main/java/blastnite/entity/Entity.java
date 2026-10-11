@@ -5,8 +5,8 @@ import java.util.List;
 import blastnite.level.Platform;
 
 /**
- * Base class for everything that moves around the level
- * (the player now; enemies and bullets later).
+ * Base class for everything that lives in the level:
+ * the player, enemies, bullets and the goal flag.
  * Every entity is a rectangle: (x, y) is its top-left corner.
  */
 public abstract class Entity {
@@ -14,6 +14,7 @@ public abstract class Entity {
     protected double y;
     protected final double width;
     protected final double height;
+    private boolean dead;
 
     protected Entity(double x, double y, double width, double height) {
         this.x = x;
@@ -27,58 +28,32 @@ public abstract class Entity {
 
     public abstract void draw(Graphics2D g);
 
-    /** True if this entity's rectangle overlaps the platform's rectangle. */
+    /** True if this entity's rectangle overlaps another entity's rectangle. */
+    public boolean intersects(Entity other) {
+        return overlapsRect(other.x, other.y, other.width, other.height);
+    }
+
+    /** True if this entity's rectangle overlaps the platform. */
     protected boolean overlaps(Platform p) {
-        return x < p.getX() + p.getWidth()
-            && x + width > p.getX()
-            && y < p.getY() + p.getHeight()
-            && y + height > p.getY();
+        return overlapsRect(p.getX(), p.getY(), p.getWidth(), p.getHeight());
     }
 
-    /**
-     * Moves sideways by dx, then pushes the entity back out of any platform it ended up inside.
-     * Returns true if it bumped into something.
-     */
-    protected boolean moveX(double dx, List<Platform> platforms) {
-        x += dx;
-        boolean hit = false;
-        for (Platform p : platforms) {
-            if (overlaps(p)) {
-                if (dx > 0) {
-                    x = p.getX() - width;              // hit a wall on the right
-                } else if (dx < 0) {
-                    x = p.getX() + p.getWidth();       // hit a wall on the left
-                }
-                hit = true;
-            }
-        }
-        return hit;
+    private boolean overlapsRect(double ox, double oy, double ow, double oh) {
+        return x < ox + ow && x + width > ox && y < oy + oh && y + height > oy;
     }
 
-    /**
-     * Moves up or down by dy, then pushes the entity back out of any platform it ended up inside.
-     * Returns true if it bumped into something (landed on a floor or hit a ceiling).
-     */
-    protected boolean moveY(double dy, List<Platform> platforms) {
-        y += dy;
-        boolean hit = false;
-        for (Platform p : platforms) {
-            if (overlaps(p)) {
-                if (dy > 0) {
-                    y = p.getY() - height;             // landed on top of a platform
-                } else if (dy < 0) {
-                    y = p.getY() + p.getHeight();      // bumped head on a ceiling
-                }
-                hit = true;
-            }
-        }
-        return hit;
+    /** Keeps the entity between minX and maxX (the left and right edge of the level). */
+    public void keepInsideX(double minX, double maxX) {
+        x = Math.max(minX, Math.min(maxX - width, x));
     }
 
-    /** Keeps the whole rectangle inside a width x height area (the window, for now). */
-    public void clampInside(double areaWidth, double areaHeight) {
-        x = Math.max(0, Math.min(areaWidth - width, x));
-        y = Math.max(0, Math.min(areaHeight - height, y));
+    /** Marks this entity as dead; the world removes it after the update loop. */
+    public void kill() {
+        dead = true;
+    }
+
+    public boolean isDead() {
+        return dead;
     }
 
     public double getX() {
