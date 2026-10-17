@@ -1,7 +1,7 @@
 # Product Backlog — Blastnite
 
 A 2D side-scrolling shooter platformer in Java Swing. Run, jump and shoot your way to the flag.
-Controls: A / D run, Space jump, J shoot, R restart.
+Controls: A / D run, Space jump, left click shoot, Esc pause, R restart, M menu.
 
 ## Must have (target: Presentation 2, Oct 8)
 
@@ -12,7 +12,7 @@ Controls: A / D run, Space jump, J shoot, R restart.
 | 3 | Platforms & collisions | The player lands on platforms, can't fall through them, and walls block sideways movement. | **Done.** Use rectangles (not circles). Move and resolve X first, then Y, to avoid getting stuck in corners. |
 | 4 | Level from a text file | Change a character in `src/main/resources/levels/level1.txt`, restart, and the level changes. | **Done.** One character = one tile (see slides). Load with `getResource`, never an absolute path. |
 | 5 | Scrolling camera | Walk right: the view follows the player through a level wider than the window. | **Done.** Draw everything shifted by a camera offset. Don't scroll past the level edges. |
-| 6 | Shooting | Press J: a bullet flies in the direction the player faces and disappears off-screen or on hitting a wall. | **Done.** Short cooldown so holding Space doesn't spam. |
+| 6 | Shooting | Click the left mouse button: a bullet flies in the direction the player faces and disappears off-screen or on hitting a wall. | **Done.** Short cooldown so holding Space doesn't spam. |
 | 7 | Walker enemies | Enemies walk back and forth on platforms, turning at edges and walls. One bullet kills an enemy. | **Done.** Mark enemies/bullets as dead and remove them after the update loop. |
 | 8 | Hearts & damage | Touch an enemy: lose a heart and blink briefly. Hearts show in the corner. | **Done.** Short invincibility after a hit so you don't lose all hearts at once. |
 | 9 | Win & game over | Reach the flag: "You win" screen. Lose all hearts or fall into a pit: "Game over". Press R to restart. | **Done.** Restart must fully reset the level. Test it several times. |
@@ -21,9 +21,9 @@ Controls: A / D run, Space jump, J shoot, R restart.
 
 | # | Name | How to Demo | Notes |
 |---|---|---|---|
-| 10 | Start menu & pause | Launch: menu with Start, How to Play, Quit. Esc pauses and resumes. | `CardLayout` to switch screens. Paused = no updates at all. |
-| 11 | Shooting enemy | An enemy stands still and fires at the player every few seconds. | Reuse the bullet class; enemy bullets only hurt the player. |
-| 12 | Coins & score | Collect a coin: the score in the corner goes up. Final score shows on the win screen. | Coins are `C` in the level file. |
+| 10 | Start menu & pause | Launch: menu with Start, How to Play, Quit. Esc pauses and resumes; M on the pause or end screen goes back to the menu. | **Done.** `CardLayout` to switch screens. Paused = no updates at all. |
+| 11 | Shooting enemy | A purple enemy stands still, turns to face the player, and fires a slow red bullet when you are close. It takes two hits. | **Done.** `T` in the level file. Reuse the bullet class; enemy bullets only hurt the player. |
+| 12 | Coins & score | Collect a coin: the score in the corner goes up. Final score shows on the win screen. | **Done.** Coin 10, walker 50, shooter 100 points. Coins are `C` in the level file. |
 
 ## Could have (if time allows)
 

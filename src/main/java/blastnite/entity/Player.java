@@ -68,7 +68,7 @@ public class Player extends Creature {
         shootTimer = SHOOT_COOLDOWN;
         double bulletX = facing > 0 ? x + width : x - Bullet.WIDTH;
         double bulletY = y + height / 2 - Bullet.HEIGHT / 2;
-        return new Bullet(bulletX, bulletY, facing);
+        return Bullet.fromPlayer(bulletX, bulletY, facing);
     }
 
     /** Lose a heart, unless we were hit very recently. Losing the last heart kills the player. */
