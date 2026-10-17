@@ -1,6 +1,15 @@
 # Blastnite
 
-A 2D side-scrolling shooter platformer in Java Swing. A / D to run, Space to jump, J to shoot, R to restart after winning or losing.
+A 2D side-scrolling shooter platformer in Java Swing. Reach the flag at the end of the level. Shoot enemies and collect coins for points.
+
+| Key | Action |
+|---|---|
+| A / D | run left / right |
+| Space | jump |
+| Left mouse click | shoot |
+| Esc | pause / resume |
+| R | restart (on pause, win or game over screen) |
+| M | back to the menu (on pause, win or game over screen) |
 
 ## Requirements
 Java 17 or newer (JDK). No external libraries.

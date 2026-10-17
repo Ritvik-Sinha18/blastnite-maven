@@ -9,6 +9,7 @@ import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+import blastnite.core.GameState;
 import blastnite.core.GameWorld;
 import blastnite.input.InputHandler;
 
@@ -25,6 +26,7 @@ public class GamePanel extends JPanel {
     private final GameWorld world;
     private final Hud hud;
     private final Timer timer;
+    private final Runnable onBackToMenu;
 
     private long lastTickNanos;
 
@@ -33,10 +35,13 @@ public class GamePanel extends JPanel {
     private double secondAccumulator;
     private int fps;
 
-    public GamePanel() {
+    /** @param onBackToMenu what to do when the player presses M on the pause / end screen */
+    public GamePanel(Runnable onBackToMenu) {
+        this.onBackToMenu = onBackToMenu;
         setPreferredSize(new Dimension(GameWorld.WIDTH, GameWorld.HEIGHT));
         setBackground(new Color(24, 26, 32));
         setDoubleBuffered(true);
+        setFocusable(true);
 
         input = new InputHandler(this);
         world = new GameWorld();
@@ -44,9 +49,18 @@ public class GamePanel extends JPanel {
         timer = new Timer(TICK_MS, e -> tick());
     }
 
-    public void start() {
+    /** Starts a fresh game and the game loop. */
+    public void startNewGame() {
+        world.newGame();
+        input.reset();
         lastTickNanos = System.nanoTime();
         timer.start();
+        requestFocusInWindow();
+    }
+
+    /** Stops the game loop (when we go back to the menu). */
+    public void stop() {
+        timer.stop();
     }
 
     private void tick() {
@@ -54,7 +68,16 @@ public class GamePanel extends JPanel {
         double dt = Math.min((now - lastTickNanos) / 1_000_000_000.0, MAX_DT);
         lastTickNanos = now;
 
+        // Going back to the menu is the window's job, not the world's,
+        // so the panel handles that key and tells the window.
+        if (world.getState() != GameState.PLAYING && input.wasMenuPressed()) {
+            input.endTick();
+            onBackToMenu.run();
+            return;
+        }
+
         world.update(dt, input);
+        input.endTick();
         updateFps(dt);
         repaint();
     }
@@ -87,5 +110,9 @@ public class GamePanel extends JPanel {
         g.setColor(new Color(150, 255, 150));
         g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
         g.drawString("fps: " + fps, GameWorld.WIDTH - 80, 20);
+    }
+
+    GameWorld getWorld() {
+        return world;
     }
 }

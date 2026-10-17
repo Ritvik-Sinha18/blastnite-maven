@@ -11,6 +11,7 @@ public class Camera {
     private final double viewWidth;
     private double x;
 
+   
     public Camera(double viewWidth) {
         this.viewWidth = viewWidth;
     }

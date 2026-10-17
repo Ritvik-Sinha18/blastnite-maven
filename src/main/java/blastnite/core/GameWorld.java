@@ -6,8 +6,11 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 import blastnite.entity.Bullet;
+import blastnite.entity.Coin;
+import blastnite.entity.Enemy;
 import blastnite.entity.Flag;
 import blastnite.entity.Player;
+import blastnite.entity.Shooter;
 import blastnite.entity.Walker;
 import blastnite.input.InputHandler;
 import blastnite.level.Level;
@@ -27,19 +30,21 @@ public class GameWorld {
 
     private final Level level;
     private final Camera camera = new Camera(WIDTH);
-    private final List<Walker> enemies = new ArrayList<>();
+    private final List<Enemy> enemies = new ArrayList<>();
     private final List<Bullet> bullets = new ArrayList<>();
+    private final List<Coin> coins = new ArrayList<>();
     private Player player;
     private Flag flag;
     private GameState state;
+    private int score;
 
     public GameWorld() {
         level = Level.load(LEVEL_FILE);
-        startLevel();
+        newGame();
     }
 
-    /** Puts everything back where the level file says: used at the start and on restart. */
-    private void startLevel() {
+    /** Puts everything back where the level file says: used for a new game and on restart. */
+    public void newGame() {
         Point2D.Double start = level.getPlayerStart();
         player = Player.standingAt(start.x, start.y);
 
@@ -47,26 +52,51 @@ public class GameWorld {
         flag = Flag.standingAt(goal.x, goal.y);
 
         enemies.clear();
-        for (Point2D.Double spawn : level.getEnemySpawns()) {
+        for (Point2D.Double spawn : level.getWalkerSpawns()) {
             enemies.add(Walker.standingAt(spawn.x, spawn.y));
         }
-        bullets.clear();
+        for (Point2D.Double spawn : level.getShooterSpawns()) {
+            enemies.add(Shooter.standingAt(spawn.x, spawn.y));
+        }
 
+        coins.clear();
+        for (Point2D.Double spot : level.getCoinPositions()) {
+            coins.add(Coin.centeredAt(spot.x, spot.y));
+        }
+
+        bullets.clear();
+        score = 0;
         camera.follow(player, level.getWidth());
         state = GameState.PLAYING;
     }
 
     public void update(double dt, InputHandler input) {
-        if (state != GameState.PLAYING) {
-            if (input.isRestartHeld()) {
-                startLevel();
-            }
-            return;   // nothing moves on the win / game over screen
+        switch (state) {
+            case PAUSED:
+                if (input.wasPausePressed()) {
+                    state = GameState.PLAYING;
+                } else if (input.isRestartHeld()) {
+                    newGame();
+                }
+                return;
+            case WON:
+            case GAME_OVER:
+                if (input.isRestartHeld()) {
+                    newGame();
+                }
+                return;   // nothing moves on the pause / win / game over screen
+            case PLAYING:
+            default:
+                if (input.wasPausePressed()) {
+                    state = GameState.PAUSED;
+                    return;
+                }
+                break;
         }
 
         List<Platform> platforms = level.getPlatforms();
 
-        // 1. The player reacts to the keyboard.
+        // 1. The player reacts to the keyboard and mouse.
         player.setRunDirection(input.getMoveX());
         if (input.isJumpHeld()) {
             player.jump();
@@ -75,22 +105,30 @@ public class GameWorld {
             bullets.add(player.shoot());
         }
 
-        // 2. Everything moves.
+        // 2. Everything moves (and enemies that can shoot get a chance to).
         player.update(dt, platforms);
         player.keepInsideX(0, level.getWidth());
-        for (Walker enemy : enemies) {
+        for (Enemy enemy : enemies) {
             enemy.update(dt, platforms);
+            Bullet shot = enemy.tryShoot(player);
+            if (shot != null) {
+                bullets.add(shot);
+            }
         }
         for (Bullet bullet : bullets) {
             bullet.update(dt, platforms);
+        }
+        for (Coin coin : coins) {
+            coin.update(dt, platforms);
         }
 
         // 3. Things hit each other.
         handleCollisions();
 
         // 4. Remove what died this tick (never while looping over the same list).
-        enemies.removeIf(Walker::isDead);
+        enemies.removeIf(Enemy::isDead);
         bullets.removeIf(Bullet::isDead);
+        coins.removeIf(Coin::isDead);
 
         // 5. Check whether the game is won or lost.
         if (player.isDead()) {
@@ -104,19 +142,33 @@ public class GameWorld {
 
     private void handleCollisions() {
         for (Bullet bullet : bullets) {
-            for (Walker enemy : enemies) {
-                if (!bullet.isDead() && !enemy.isDead() && bullet.intersects(enemy)) {
-                    bullet.kill();
-                    enemy.kill();
+            if (bullet.isFromPlayer()) {
+                for (Enemy enemy : enemies) {
+                    if (!bullet.isDead() && !enemy.isDead() && bullet.intersects(enemy)) {
+                        bullet.kill();
+                        enemy.takeHit();
+                        if (enemy.isDead()) {
+                            score += enemy.getPoints();
+                        }
+                    }
                 }
+            } else if (!bullet.isDead() && bullet.intersects(player)) {
+                bullet.kill();
+                player.takeHit();
             }
         }
-        for (Walker enemy : enemies) {
+        for (Enemy enemy : enemies) {
             if (!enemy.isDead() && enemy.intersects(player)) {
                 player.takeHit();
             }
             if (enemy.getY() > level.getHeight()) {
-                enemy.kill();   // fell into a pit
+                enemy.kill();   // fell into a pit (no points)
+            }
+        }
+        for (Coin coin : coins) {
+            if (!coin.isDead() && coin.intersects(player)) {
+                coin.kill();
+                score += Coin.VALUE;
             }
         }
         if (player.getY() > level.getHeight()) {
@@ -132,7 +184,10 @@ public class GameWorld {
         drawBackgroundGrid(g, cameraX);
         level.draw(g, cameraX, cameraX + WIDTH);
         flag.draw(g);
-        for (Walker enemy : enemies) {
+        for (Coin coin : coins) {
+            coin.draw(g);
+        }
+        for (Enemy enemy : enemies) {
             enemy.draw(g);
         }
         for (Bullet bullet : bullets) {
@@ -162,7 +217,15 @@ public class GameWorld {
         return state;
     }
 
+    public int getScore() {
+        return score;
+    }
+
     public int getEnemiesLeft() {
         return enemies.size();
+    }
+
+    public int getCoinsLeft() {
+        return coins.size();
     }
 }
