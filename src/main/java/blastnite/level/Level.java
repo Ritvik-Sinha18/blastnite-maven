@@ -17,11 +17,13 @@ import java.util.List;
  *
  *   #  solid block        P  player start
  *   .  empty air          E  walker enemy
- *   F  goal flag
+ *   F  goal flag          T  shooter enemy
+ *   C  coin
  *
  * The level itself never changes while playing, so it is loaded once.
  * Spawn points are stored as "foot points": the x of the middle of the tile
  * and the y of the bottom of the tile, so things stand on the floor.
+ * Coins float, so their points are the middle of the tile instead.
  */
 public class Level {
     public static final int TILE_SIZE = 40;
@@ -33,7 +35,9 @@ public class Level {
     private final List<String> rows;
     private final int columns;
     private final List<Platform> platforms = new ArrayList<>();
-    private final List<Point2D.Double> enemySpawns = new ArrayList<>();
+    private final List<Point2D.Double> walkerSpawns = new ArrayList<>();
+    private final List<Point2D.Double> shooterSpawns = new ArrayList<>();
+    private final List<Point2D.Double> coinPositions = new ArrayList<>();
     private Point2D.Double playerStart;
     private Point2D.Double flagPosition;
 
@@ -98,7 +102,11 @@ public class Level {
                 if (tile == 'P') {
                     playerStart = foot;
                 } else if (tile == 'E') {
-                    enemySpawns.add(foot);
+                    walkerSpawns.add(foot);
+                } else if (tile == 'T') {
+                    shooterSpawns.add(foot);
+                } else if (tile == 'C') {
+                    coinPositions.add(new Point2D.Double(foot.x, foot.y - TILE_SIZE / 2.0));
                 } else if (tile == 'F') {
                     flagPosition = foot;
                 }
@@ -141,8 +149,16 @@ public class Level {
         return Collections.unmodifiableList(platforms);
     }
 
-    public List<Point2D.Double> getEnemySpawns() {
-        return Collections.unmodifiableList(enemySpawns);
+    public List<Point2D.Double> getWalkerSpawns() {
+        return Collections.unmodifiableList(walkerSpawns);
+    }
+
+    public List<Point2D.Double> getShooterSpawns() {
+        return Collections.unmodifiableList(shooterSpawns);
+    }
+
+    public List<Point2D.Double> getCoinPositions() {
+        return Collections.unmodifiableList(coinPositions);
     }
 
     public Point2D.Double getPlayerStart() {

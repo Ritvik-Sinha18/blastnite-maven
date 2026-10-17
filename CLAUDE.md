@@ -2,7 +2,7 @@
 
 Pair project for the CBL assignment in Programming (2IP90). A 2D side-scrolling shooter
 platformer: run, jump and shoot your way through a level to reach the flag.
-Controls: A / D run, Space jump, J shoot, R restart. Levels are loaded from text files (one char = one tile).
+Controls: A / D run, Space jump, left click shoot, Esc pause, R restart, M menu. Levels are loaded from text files (one char = one tile).
 
 ## Hard requirements (from the assignment)
 - Java Swing GUI only. No external libraries: it must build and run on Windows, macOS
@@ -22,14 +22,15 @@ Controls: A / D run, Space jump, J shoot, R restart. Levels are loaded from text
 - Use a Git branch per backlog item and merge through a pull request (this is topic 1).
 
 ## Architecture (Maven project; packages under src/main/java/blastnite)
-- `Main` — starts the GUI on the EDT.
-- `ui` — `GameWindow` (JFrame), `GamePanel` (Swing Timer game loop, delta time, painting), `Hud` (hearts, controls hint, win/game-over overlay).
-- `core` — `GameWorld` (all game state and rules; update order: input, move, collisions, remove dead, win/lose),
-  `GameState` (PLAYING / WON / GAME_OVER), `Camera` (horizontal scrolling).
-- `entity` — `Entity` (rectangle, dead flag) → `Creature` (gravity + X-then-Y collision) → `Player`, `Walker`;
-  `Bullet` and `Flag` extend `Entity` directly.
-- `level` — `Level` loads `src/main/resources/levels/level1.txt` (# block, P player, E walker, F flag), `Platform` (solid rectangle).
-- `input` — `InputHandler`: Key Bindings (not KeyListener), tracks held keys.
+- `Main` — starts the GUI on the EDT and shows the menu.
+- `ui` — `GameWindow` (JFrame with a CardLayout: menu screen and game screen), `MenuPanel` (title + Swing buttons),
+  `GamePanel` (Swing Timer game loop, delta time, painting; M key returns to menu), `Hud` (hearts, score, hints, pause/win/lose overlays).
+- `core` — `GameWorld` (all game state and rules; update order: input, move, enemies may shoot, collisions, remove dead, win/lose),
+  `GameState` (PLAYING / PAUSED / WON / GAME_OVER), `Camera` (horizontal scrolling).
+- `entity` — `Entity` (rectangle, dead flag) → `Creature` (gravity + X-then-Y collision) → `Player`, and
+  `Enemy` (hit points, points, `tryShoot`) → `Walker`, `Shooter`. `Bullet` (player or enemy), `Coin`, `Flag` extend `Entity` directly.
+- `level` — `Level` loads `src/main/resources/levels/level1.txt` (# block, P player, E walker, T shooter, C coin, F flag), `Platform`.
+- `input` — `InputHandler`: Key Bindings + left mouse button; "held" for continuous actions, "was pressed" (cleared each tick) for one-off actions like pause.
 
 ## Conventions
 - Movement in pixels/second times dt; dt capped at 0.05s.
@@ -40,8 +41,8 @@ Controls: A / D run, Space jump, J shoot, R restart. Levels are loaded from text
   Resource files go in src/main/resources.
 
 ## Status
-- Done: backlog items 1–9 (one complete, playable level).
-- Next: item 10 (start menu & pause), 11 (shooting enemy), 12 (coins & score).
+- Done: backlog items 1–12 (complete game: menu, one level, two enemy types, coins and score).
+- Next (could-haves): 13 second level, 14 sprites & animation, 15 sound effects. Also: README polish, reflection.
 
 ## Build & run
 IDE: open as a Maven project and run blastnite.Main.

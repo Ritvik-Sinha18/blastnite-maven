@@ -10,25 +10,37 @@ import blastnite.entity.Player;
 
 /**
  * Draws everything that stays fixed on the screen on top of the game:
- * hearts, the controls hint, and the win / game over screens.
+ * hearts, score, the controls hint, and the pause / win / game over screens.
  */
 public class Hud {
     private static final Color HEART_FULL = new Color(255, 92, 110);
     private static final Color HEART_EMPTY = new Color(70, 76, 98);
     private static final Color TEXT = new Color(220, 226, 240);
+    private static final Color GOLD = new Color(244, 197, 66);
 
     private final Font smallFont = new Font(Font.SANS_SERIF, Font.PLAIN, 14);
+    private final Font scoreFont = new Font(Font.SANS_SERIF, Font.BOLD, 20);
     private final Font titleFont = new Font(Font.SANS_SERIF, Font.BOLD, 64);
     private final Font subtitleFont = new Font(Font.SANS_SERIF, Font.PLAIN, 22);
 
     public void draw(Graphics2D g, GameWorld world) {
         drawHearts(g, world.getPlayer());
+        drawScore(g, world.getScore());
         drawControlsHint(g);
 
-        if (world.getState() == GameState.WON) {
-            drawOverlay(g, "YOU WIN!", "Press R to play again", new Color(120, 220, 140));
-        } else if (world.getState() == GameState.GAME_OVER) {
-            drawOverlay(g, "GAME OVER", "Press R to try again", HEART_FULL);
+        String score = "Score: " + world.getScore();
+        switch (world.getState()) {
+            case PAUSED:
+                drawOverlay(g, "PAUSED", "Esc  resume     R  restart     M  menu", TEXT);
+                break;
+            case WON:
+                drawOverlay(g, "YOU WIN!", score + "     R  play again     M  menu", new Color(120, 220, 140));
+                break;
+            case GAME_OVER:
+                drawOverlay(g, "GAME OVER", score + "     R  try again     M  menu", HEART_FULL);
+                break;
+            default:
+                break;
         }
     }
 
@@ -48,10 +60,18 @@ public class Hud {
         g.fillPolygon(xs, ys, 3);
     }
 
+    private void drawScore(Graphics2D g, int score) {
+        g.setColor(GOLD);
+        g.fillOval(130, 17, 18, 18);
+        g.setFont(scoreFont);
+        g.setColor(TEXT);
+        g.drawString(String.valueOf(score), 156, 33);
+    }
+
     private void drawControlsHint(Graphics2D g) {
         g.setFont(smallFont);
         g.setColor(TEXT);
-        g.drawString("A / D  run     Space  jump     Click  shoot", 16, GameWorld.HEIGHT - 14);
+        g.drawString("A / D  run     Space  jump     Click  shoot     Esc  pause", 16, GameWorld.HEIGHT - 14);
     }
 
     private void drawOverlay(Graphics2D g, String title, String subtitle, Color titleColor) {
