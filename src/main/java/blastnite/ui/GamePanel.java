@@ -49,9 +49,9 @@ public class GamePanel extends JPanel {
         timer = new Timer(TICK_MS, e -> tick());
     }
 
-    /** Starts a fresh game and the game loop. */
-    public void startNewGame() {
-        world.newGame();
+    /** Starts the chosen level (0 = Easy, 1 = Difficult) and the game loop. */
+    public void startNewGame(int chosenLevel) {
+        world.newGame(chosenLevel);
         input.reset();
         lastTickNanos = System.nanoTime();
         timer.start();

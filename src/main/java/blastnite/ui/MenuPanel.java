@@ -20,7 +20,7 @@ import javax.swing.JPanel;
 import blastnite.core.GameWorld;
 
 /**
- * The start screen: the title and three buttons (Start, How to Play, Quit).
+ * The start screen: the title and four buttons (Easy, Difficult, How to Play, Quit).
  * It does not know what the buttons do; the window passes that in.
  */
 public class MenuPanel extends JPanel {
@@ -30,7 +30,7 @@ public class MenuPanel extends JPanel {
     private static final Color TEXT = new Color(235, 238, 248);
     private static final Color ACCENT = new Color(255, 154, 60);
 
-    public MenuPanel(Runnable onStart, Runnable onHowToPlay, Runnable onQuit) {
+    public MenuPanel(Runnable onEasy, Runnable onDifficult, Runnable onHowToPlay, Runnable onQuit) {
         setPreferredSize(new Dimension(GameWorld.WIDTH, GameWorld.HEIGHT));
         setBackground(BACKGROUND);
         setLayout(new GridBagLayout());   // centers the column of content
@@ -52,13 +52,15 @@ public class MenuPanel extends JPanel {
         column.add(title);
         column.add(Box.createVerticalStrut(8));
         column.add(subtitle);
-        column.add(Box.createVerticalStrut(48));
-        column.add(makeButton("Start", onStart));
+        column.add(Box.createVerticalStrut(40));
+        column.add(makeButton("Play: Easy", onEasy));
+        column.add(Box.createVerticalStrut(14));
+        column.add(makeButton("Play: Difficult", onDifficult));
         column.add(Box.createVerticalStrut(14));
         column.add(makeButton("How to Play", onHowToPlay));
         column.add(Box.createVerticalStrut(14));
         column.add(makeButton("Quit", onQuit));
-        column.add(Box.createVerticalStrut(90));   // keeps the buttons above the ground drawing
+        column.add(Box.createVerticalStrut(70));   // keeps the buttons above the ground drawing
 
         add(column);
     }

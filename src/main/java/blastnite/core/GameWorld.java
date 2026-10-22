@@ -25,12 +25,14 @@ public class GameWorld {
     public static final int WIDTH = 960;
     public static final int HEIGHT = 640;
 
-    /** The levels, in the order you play them. A file that doesn't exist yet is skipped. */
+    /** The levels the player can choose from, and the name shown for each one. */
     private static final String[] LEVEL_FILES = {"/levels/level1.txt", "/levels/level2.txt"};
+    private static final String[] LEVEL_NAMES = {"Easy", "Difficult"};
     private static final int GRID_SPACING = 40;
 
     private final List<Level> levels = new ArrayList<>();
-    private int levelIndex;   // 0 = first level
+    private final List<String> levelNames = new ArrayList<>();
+    private int levelIndex;   // which level was chosen: 0 = Easy, 1 = Difficult
     private Level level;      // the level being played right now
     private final Camera camera = new Camera(WIDTH);
     private final List<Enemy> enemies = new ArrayList<>();
@@ -42,17 +44,23 @@ public class GameWorld {
     private int score;
 
     public GameWorld() {
-        for (String file : LEVEL_FILES) {
-            if (GameWorld.class.getResource(file) != null) {
-                levels.add(Level.load(file));
+        for (int i = 0; i < LEVEL_FILES.length; i++) {
+            if (GameWorld.class.getResource(LEVEL_FILES[i]) != null) {
+                levels.add(Level.load(LEVEL_FILES[i]));
+                levelNames.add(LEVEL_NAMES[i]);
             }
         }
+        newGame(0);
+    }
+
+    /** Starts the chosen level (0 = Easy, 1 = Difficult) with a score of 0. */
+    public void newGame(int chosenLevel) {
+        levelIndex = Math.max(0, Math.min(chosenLevel, levels.size() - 1));
         newGame();
     }
 
-    /** Starts again from the first level with a score of 0. Used for a new game and on restart. */
+    /** Restarts the same level with a score of 0 (used when pressing R). */
     public void newGame() {
-        levelIndex = 0;
         score = 0;
         startLevel();
     }
@@ -149,12 +157,7 @@ public class GameWorld {
         if (player.isDead()) {
             state = GameState.GAME_OVER;
         } else if (player.intersects(flag)) {
-            if (levelIndex < levels.size() - 1) {
-                levelIndex++;        // on to the next level, keeping the score
-                startLevel();
-                return;
-            }
-            state = GameState.WON;   // that was the last level
+            state = GameState.WON;
         }
 
         camera.follow(player, level.getWidth());
@@ -241,11 +244,12 @@ public class GameWorld {
         return score;
     }
 
-    /** The level being played, counting from 1. */
-    public int getLevelNumber() {
-        return levelIndex + 1;
+    /** The name of the level being played, e.g. "Easy". */
+    public String getLevelName() {
+        return levelNames.get(levelIndex);
     }
 
+    /** How many levels there are to choose from. */
     public int getLevelCount() {
         return levels.size();
     }

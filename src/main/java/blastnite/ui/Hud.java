@@ -26,7 +26,7 @@ public class Hud {
     public void draw(Graphics2D g, GameWorld world) {
         drawHearts(g, world.getPlayer());
         drawScore(g, world.getScore());
-        drawLevel(g, world.getLevelNumber(), world.getLevelCount());
+        drawLevel(g, world.getLevelName());
         drawControlsHint(g);
 
         String score = "Score: " + world.getScore();
@@ -69,10 +69,10 @@ public class Hud {
         g.drawString(String.valueOf(score), 156, 33);
     }
 
-    private void drawLevel(Graphics2D g, int number, int count) {
+    private void drawLevel(Graphics2D g, String name) {
         g.setFont(scoreFont);
         g.setColor(TEXT);
-        g.drawString("Level " + number + " / " + count, 240, 33);
+        g.drawString("Level: " + name, 240, 33);
     }
 
     private void drawControlsHint(Graphics2D g) {
