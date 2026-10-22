@@ -5,7 +5,7 @@ Programming (2IP90). Run, jump and blast your way through the level to reach the
 
 **Team:** Ritvik Sinha and Luca Cringus
 
-![Blastnite menu](docs/screenshot.png)
+   ![Blastnite menu](screenshot.png)
 
 ## Features
 - Two levels to choose from on the menu: **Easy** and **Difficult**
