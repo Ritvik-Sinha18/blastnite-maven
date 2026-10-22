@@ -30,6 +30,7 @@ public class GameWorld {
     private static final String[] LEVEL_NAMES = {"Easy", "Difficult"};
     private static final int GRID_SPACING = 40;
 
+    private final HighScores highScores;
     private final List<Level> levels = new ArrayList<>();
     private final List<String> levelNames = new ArrayList<>();
     private int levelIndex;   // which level was chosen: 0 = Easy, 1 = Difficult
@@ -42,8 +43,10 @@ public class GameWorld {
     private Flag flag;
     private GameState state;
     private int score;
+    private boolean newBest;   // did the last finished game beat the best score?
 
-    public GameWorld() {
+    public GameWorld(HighScores highScores) {
+        this.highScores = highScores;
         for (int i = 0; i < LEVEL_FILES.length; i++) {
             if (GameWorld.class.getResource(LEVEL_FILES[i]) != null) {
                 levels.add(Level.load(LEVEL_FILES[i]));
@@ -62,6 +65,7 @@ public class GameWorld {
     /** Restarts the same level with a score of 0 (used when pressing R). */
     public void newGame() {
         score = 0;
+        newBest = false;
         startLevel();
     }
 
@@ -155,12 +159,18 @@ public class GameWorld {
 
         // 5. Check whether the game is won or lost.
         if (player.isDead()) {
-            state = GameState.GAME_OVER;
+            endGame(GameState.GAME_OVER);
         } else if (player.intersects(flag)) {
-            state = GameState.WON;
+            endGame(GameState.WON);
         }
 
         camera.follow(player, level.getWidth());
+    }
+
+    /** The game is over (won or lost): remember the score if it is a new best. */
+    private void endGame(GameState result) {
+        state = result;
+        newBest = highScores.submit(getLevelName(), score);
     }
 
     private void handleCollisions() {
@@ -247,6 +257,16 @@ public class GameWorld {
     /** The name of the level being played, e.g. "Easy". */
     public String getLevelName() {
         return levelNames.get(levelIndex);
+    }
+
+    /** The best score ever reached on the level being played. */
+    public int getBestScore() {
+        return highScores.getBest(getLevelName());
+    }
+
+    /** True if the game that just ended set a new best score. */
+    public boolean isNewBest() {
+        return newBest;
     }
 
     /** How many levels there are to choose from. */
