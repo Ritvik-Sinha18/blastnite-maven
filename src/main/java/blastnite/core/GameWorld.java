@@ -25,10 +25,13 @@ public class GameWorld {
     public static final int WIDTH = 960;
     public static final int HEIGHT = 640;
 
-    private static final String LEVEL_FILE = "/levels/level1.txt";
+    /** The levels, in the order you play them. A file that doesn't exist yet is skipped. */
+    private static final String[] LEVEL_FILES = {"/levels/level1.txt", "/levels/level2.txt"};
     private static final int GRID_SPACING = 40;
 
-    private final Level level;
+    private final List<Level> levels = new ArrayList<>();
+    private int levelIndex;   // 0 = first level
+    private Level level;      // the level being played right now
     private final Camera camera = new Camera(WIDTH);
     private final List<Enemy> enemies = new ArrayList<>();
     private final List<Bullet> bullets = new ArrayList<>();
@@ -39,12 +42,25 @@ public class GameWorld {
     private int score;
 
     public GameWorld() {
-        level = Level.load(LEVEL_FILE);
+        for (String file : LEVEL_FILES) {
+            if (GameWorld.class.getResource(file) != null) {
+                levels.add(Level.load(file));
+            }
+        }
         newGame();
     }
 
-    /** Puts everything back where the level file says: used for a new game and on restart. */
+    /** Starts again from the first level with a score of 0. Used for a new game and on restart. */
     public void newGame() {
+        levelIndex = 0;
+        score = 0;
+        startLevel();
+    }
+
+    /** Puts everything back where the current level file says. The score is kept. */
+    private void startLevel() {
+        level = levels.get(levelIndex);
+
         Point2D.Double start = level.getPlayerStart();
         player = Player.standingAt(start.x, start.y);
 
@@ -65,7 +81,6 @@ public class GameWorld {
         }
 
         bullets.clear();
-        score = 0;
         camera.follow(player, level.getWidth());
         state = GameState.PLAYING;
     }
@@ -134,7 +149,12 @@ public class GameWorld {
         if (player.isDead()) {
             state = GameState.GAME_OVER;
         } else if (player.intersects(flag)) {
-            state = GameState.WON;
+            if (levelIndex < levels.size() - 1) {
+                levelIndex++;        // on to the next level, keeping the score
+                startLevel();
+                return;
+            }
+            state = GameState.WON;   // that was the last level
         }
 
         camera.follow(player, level.getWidth());
@@ -219,6 +239,15 @@ public class GameWorld {
 
     public int getScore() {
         return score;
+    }
+
+    /** The level being played, counting from 1. */
+    public int getLevelNumber() {
+        return levelIndex + 1;
+    }
+
+    public int getLevelCount() {
+        return levels.size();
     }
 
     public int getEnemiesLeft() {
