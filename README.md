@@ -3,7 +3,7 @@
 A 2D side-scrolling shooter platformer made with Java Swing for the CBL project of
 Programming (2IP90). Run, jump and blast your way through the level to reach the flag.
 
-**Team:** Rehan Badar & [Partner name]
+**Team:** Ritvik Sinha and Luca Cringus
 
 ![Blastnite menu](docs/screenshot.png)
 
@@ -95,3 +95,4 @@ Source code is in `src/main/java/blastnite/`:
 We worked with a Git branching workflow: every feature was built on its own branch and merged
 into `main` through a pull request. The product backlog is in `BACKLOG.md`.
 Our two advanced topics, Git branching workflows and UX & game design, are described in the reflection document.
+
