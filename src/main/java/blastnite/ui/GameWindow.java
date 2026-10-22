@@ -19,7 +19,11 @@ public class GameWindow extends JFrame {
 
     public GameWindow() {
         super("Blastnite");
-        MenuPanel menuPanel = new MenuPanel(this::startGame, this::showHowToPlay, this::quit);
+        MenuPanel menuPanel = new MenuPanel(
+                () -> startGame(0),      // Easy
+                () -> startGame(1),      // Difficult
+                this::showHowToPlay,
+                this::quit);
         gamePanel = new GamePanel(this::showMenu);
 
         screens.add(menuPanel, MENU);
@@ -37,14 +41,15 @@ public class GameWindow extends JFrame {
         cards.show(screens, MENU);
     }
 
-    public void startGame() {
+    /** Shows the game screen and starts the chosen level (0 = Easy, 1 = Difficult). */
+    public void startGame(int chosenLevel) {
         cards.show(screens, GAME);
-        gamePanel.startNewGame();
+        gamePanel.startNewGame(chosenLevel);
     }
 
     private void showHowToPlay() {
         String text = String.join("\n",
-                "Reach the flag at the end of the level.",
+                "Choose Easy or Difficult, then reach the flag at the end of the level.",
                 "",
                 "A / D        run left and right",
                 "Space        jump",
