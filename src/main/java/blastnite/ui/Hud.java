@@ -26,19 +26,21 @@ public class Hud {
     public void draw(Graphics2D g, GameWorld world) {
         drawHearts(g, world.getPlayer());
         drawScore(g, world.getScore());
-        drawLevel(g, world.getLevelName());
+        drawLevel(g, world.getLevelName(), world.getBestScore());
         drawControlsHint(g);
 
-        String score = "Score: " + world.getScore();
+        String scoreLine = "Score: " + world.getScore() + "     Best: " + world.getBestScore();
         switch (world.getState()) {
             case PAUSED:
-                drawOverlay(g, "PAUSED", "Esc  resume     R  restart     M  menu", TEXT);
+                drawOverlay(g, "PAUSED", null, "Esc  resume     R  restart     M  menu", TEXT, false);
                 break;
             case WON:
-                drawOverlay(g, "YOU WIN!", score + "     R  play again     M  menu", new Color(120, 220, 140));
+                drawOverlay(g, "YOU WIN!", scoreLine, "R  play again     M  menu",
+                        new Color(120, 220, 140), world.isNewBest());
                 break;
             case GAME_OVER:
-                drawOverlay(g, "GAME OVER", score + "     R  try again     M  menu", HEART_FULL);
+                drawOverlay(g, "GAME OVER", scoreLine, "R  try again     M  menu",
+                        HEART_FULL, world.isNewBest());
                 break;
             default:
                 break;
@@ -69,10 +71,13 @@ public class Hud {
         g.drawString(String.valueOf(score), 156, 33);
     }
 
-    private void drawLevel(Graphics2D g, String name) {
+    private void drawLevel(Graphics2D g, String name, int best) {
         g.setFont(scoreFont);
         g.setColor(TEXT);
         g.drawString("Level: " + name, 240, 33);
+        g.setFont(smallFont);
+        g.setColor(GOLD);
+        g.drawString("Best: " + best, 440, 32);
     }
 
     private void drawControlsHint(Graphics2D g) {
@@ -81,17 +86,33 @@ public class Hud {
         g.drawString("A / D  run     Space  jump     Click  shoot     Esc  pause", 16, GameWorld.HEIGHT - 14);
     }
 
-    private void drawOverlay(Graphics2D g, String title, String subtitle, Color titleColor) {
+    /**
+     * Darkens the game and shows a big title, an optional score line, the keys to press,
+     * and "NEW BEST!" if the player just beat their best score.
+     */
+    private void drawOverlay(Graphics2D g, String title, String scoreLine, String keys,
+                             Color titleColor, boolean newBest) {
         g.setColor(new Color(10, 12, 20, 180));   // see-through dark layer over the game
         g.fillRect(0, 0, GameWorld.WIDTH, GameWorld.HEIGHT);
 
+        int y = GameWorld.HEIGHT / 2 - 20;
+        if (newBest) {
+            g.setFont(subtitleFont);
+            g.setColor(GOLD);
+            drawCentered(g, "NEW BEST!", y - 70);
+        }
+
         g.setFont(titleFont);
         g.setColor(titleColor);
-        drawCentered(g, title, GameWorld.HEIGHT / 2 - 10);
+        drawCentered(g, title, y);
 
         g.setFont(subtitleFont);
         g.setColor(TEXT);
-        drawCentered(g, subtitle, GameWorld.HEIGHT / 2 + 40);
+        if (scoreLine != null) {
+            drawCentered(g, scoreLine, y + 50);
+            y += 36;
+        }
+        drawCentered(g, keys, y + 50);
     }
 
     private void drawCentered(Graphics2D g, String text, int y) {

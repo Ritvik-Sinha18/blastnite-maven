@@ -4,6 +4,7 @@ import java.awt.CardLayout;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import blastnite.core.HighScores;
 
 /**
  * The application window. It holds two screens, the menu and the game,
@@ -16,15 +17,18 @@ public class GameWindow extends JFrame {
     private final CardLayout cards = new CardLayout();
     private final JPanel screens = new JPanel(cards);
     private final GamePanel gamePanel;
+    private final MenuPanel menuPanel;
 
     public GameWindow() {
         super("Blastnite");
-        MenuPanel menuPanel = new MenuPanel(
+        HighScores highScores = new HighScores();   // shared: the game saves scores, the menu shows them
+        menuPanel = new MenuPanel(
+                highScores,
                 () -> startGame(0),      // Easy
                 () -> startGame(1),      // Difficult
                 this::showHowToPlay,
                 this::quit);
-        gamePanel = new GamePanel(this::showMenu);
+        gamePanel = new GamePanel(highScores, this::showMenu);
 
         screens.add(menuPanel, MENU);
         screens.add(gamePanel, GAME);
@@ -38,6 +42,7 @@ public class GameWindow extends JFrame {
 
     public void showMenu() {
         gamePanel.stop();
+        menuPanel.refreshScores();   // show any new best score
         cards.show(screens, MENU);
     }
 

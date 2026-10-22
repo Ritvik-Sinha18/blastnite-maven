@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 import blastnite.core.GameState;
 import blastnite.core.GameWorld;
+import blastnite.core.HighScores;
 import blastnite.input.InputHandler;
 
 /**
@@ -35,8 +36,11 @@ public class GamePanel extends JPanel {
     private double secondAccumulator;
     private int fps;
 
-    /** @param onBackToMenu what to do when the player presses M on the pause / end screen */
-    public GamePanel(Runnable onBackToMenu) {
+    /**
+     * @param highScores   where best scores are remembered
+     * @param onBackToMenu what to do when the player presses M on the pause / end screen
+     */
+    public GamePanel(HighScores highScores, Runnable onBackToMenu) {
         this.onBackToMenu = onBackToMenu;
         setPreferredSize(new Dimension(GameWorld.WIDTH, GameWorld.HEIGHT));
         setBackground(new Color(24, 26, 32));
@@ -44,7 +48,7 @@ public class GamePanel extends JPanel {
         setFocusable(true);
 
         input = new InputHandler(this);
-        world = new GameWorld();
+        world = new GameWorld(highScores);
         hud = new Hud();
         timer = new Timer(TICK_MS, e -> tick());
     }
